@@ -44,7 +44,6 @@ class AuthService {
         console.log(coordinates)
         await user.save()
         if (user.role === 'driver') {
-            await this.locationService.setDriver(user._id, socketId)
             await this.locationService.addDriversLocation(coordinates[0], coordinates[1], user._id)
         }
         const token = generateAuthToken(user._id, serviceConfig.EXPIRY_TIME);

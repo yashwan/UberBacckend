@@ -54,7 +54,7 @@ const PORT = serviceConfig.PORT || 5000;
 
 let isMongooseRunningSuccessFully;
 let isRedisRunningSuccessFully;
-
+let socketIdMain;
 
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
@@ -73,6 +73,25 @@ app.use("/api", (req, res, next) => {
     logger.info(`Path: ${req.url} - Method: ${req.method}`)
     next()
 }, v1Route(io))
+
+io.on("connection", async (socket) => {
+    socketIdMain = socket.id
+    socket.on('registerDriver', async (driver) => {
+        await locationService.setDriver(driver, socketIdMain);
+        console.log("set driver socket");
+    });
+
+    socket.on('registerPassenger', async (passenger) => {
+        await locationService.setPassenger(passenger, socketIdMain);
+        console.log("set passenger socket");
+    });
+    console.log(socketIdMain)
+    socket.on("disconnect", async () => {
+        const driverId = locationService.getDriverBySocketId(socketIdMain)
+        await locationService.delDriver(`driver:${driverId}`)
+        console.log("deleted driver socket");
+    })
+})
 
 app.get('/index.html', (req, res) => {
     res.sendFile(__dirname + '/index.html');
@@ -105,7 +124,7 @@ redisClient.connect().then(() => {
 })
 
 
-server.listen(PORT, () => {
+server.listen(PORT, async () => {
     logger.info(`Server is running on PORT: ${PORT}`);
 });
 
@@ -121,16 +140,4 @@ mongoose.connect(process.env.MONGO_URI, {
 
 
 
-io.on("connection", (socket) => {
-    const socketId = socket.id
-    socket.on('registerDriver', async (driver) => {
-        await locationService.setDriver(driver, socket.id);
-        console.log("set driver socket");
-    });
-
-    socket.on("disconnect", async () => {
-        const driverId = locationService.getDriverBySocketId(socketId)
-        await locationService.delDriver(`driver:${driverId}`)
-        console.log("deleted driver socket");
-    })
-})
+module.exports = socketIdMain

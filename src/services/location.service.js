@@ -7,6 +7,18 @@ class LocationService {
         await redisClient.set(`driver:${driverId}`, socketId)
     }
 
+    async setPassenger(passengerId, socketId){
+        await redisClient.set(socketId, passengerId)
+        await redisClient.set(`passenger:${passengerId}`, socketId)
+    }
+
+    async getPassenger(passengerId){
+        return await redisClient.get(`passenger:${passengerId}`)
+    }
+
+    async getPassengerBySocketId(socketId) {
+        return await redisClient.get(socketId)
+    }
     async getDriver(driverId) {
         return await redisClient.get(`driver:${driverId}`)
     }
@@ -29,10 +41,6 @@ class LocationService {
         } catch (error) {
             console.log("locations add", error)
         }
-    }
-
-    async delDriverLocation(driverId){
-        await redisClient.zRem("driver", driverId.toString())
     }
 
     async findNearByDrivers(latitude, longitude, radius = 30) {
@@ -62,6 +70,7 @@ class LocationService {
     async getNotifiedDrivers(bookingId) {
         return await redisClient.sMembers(`notify${bookingId}`)
     }
+
 }
 
 module.exports = LocationService
