@@ -43,8 +43,7 @@ class BookingService {
     }
 
     async getBookings() {
-        const bookings = BookingModel.find({}).where({
-        })
+        return await BookingModel.find({})
     }
     async updateBookingsById(Id, data) {
         try {
@@ -52,7 +51,7 @@ class BookingService {
             if (!getBookingById) {
                 throw new Error(`No booking was created by Id: ${Id}`);
             }
-            getBookingById.updateOne(Id, {}, {
+            getBookingById.updateOne(Id, { ...data }, {
                 new: true
             })
         } catch (error) {
@@ -61,11 +60,10 @@ class BookingService {
         }
     }
 
-    async findNearByDrivers(location, radius = 5){
-        if(!location || !location.Latitude || !location.Longitude){
+    async findNearByDrivers(location, radius = 5) {
+        if (!location || !location.Latitude || !location.Longitude) {
             throw new ApiError("Invalid co-ordinates", StatusCodes.BAD_REQUEST)
         }
-        const radiusKm = parseFloat(radius)
         const latitude = parseFloat(location.Latitude)
         const longitude = parseFloat(location.Longitude)
         const nearByDrivers = await this.locationService.findNearByDrivers(latitude, longitude) // type array;
@@ -85,9 +83,9 @@ class BookingService {
         }
     }
 
-    async assignBooking(bookingId, driverId){
+    async assignBooking(bookingId, driverId) {
         const booking = await bookingRepository.getById(bookingId)
-        if(!booking) throw new ApiError("Booking does not exist", StatusCodes.BAD_REQUEST)
+        if (!booking) throw new ApiError("Booking does not exist", StatusCodes.BAD_REQUEST)
         booking.status = "confirmed"
         booking.driver = driverId
         await booking.save()

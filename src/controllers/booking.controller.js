@@ -3,6 +3,7 @@ const ApiError = require("../helpers/ApiError");
 const { BookingService, LocationService } = require("../services");
 const logger = require("../helpers/loggers");
 const { statusCodeError } = require("../helpers/short-functions/error");
+const { emailProducer, bookingProducer } = require("../producers");
 
 const bookingService = new BookingService()
 const locationService = new LocationService()
@@ -17,12 +18,13 @@ const createBooking = (io) => {
                 Longitude: user.location.coordinates[1]
             }
 
+
             const booking = await bookingService.createBooking({ source, destination, passenger })
             const nearByDrivers = await bookingService.findNearByDrivers(source)
             const driverIds = []
             for(const driver of nearByDrivers){
                 const driverSocketId = await locationService.getDriver(driver[0])
-
+                if(!driverSocketId) continue
                 driverIds.push(driverSocketId)
                 console.log(driverSocketId)
                 io.to(driverSocketId).emit("newBooking", {
@@ -36,6 +38,11 @@ const createBooking = (io) => {
 
 
             await locationService.storeNotifiedDrivers(booking._id.toString(), driverIds)
+            await bookingProducer({
+                userGmail: user.email, 
+                subject: "Booking Created", 
+                content: `hey ${user.name}, hang on booking created BookingId: ${booking._id}`
+            })
             res.status(StatusCodes.CREATED).send({
                 error: null,
                 message: "Created car booking successfully.",

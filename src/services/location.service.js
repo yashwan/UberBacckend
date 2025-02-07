@@ -31,6 +31,10 @@ class LocationService {
         }
     }
 
+    async delDriverLocation(driverId){
+        await redisClient.zRem("driver", driverId.toString())
+    }
+
     async findNearByDrivers(latitude, longitude, radius = 30) {
         const result = await redisClient.sendCommand([
             'GEORADIUS',

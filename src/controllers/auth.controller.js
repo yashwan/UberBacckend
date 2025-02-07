@@ -21,14 +21,10 @@ class AuthController {
     }
 
     loginUser = (io) => {
-        var socketId;
-        // io.on("connection", (socket) => {
-        //     socketId = socket.id
-        // })
         return async (req, res, next) => {
         try {
-            const { password, email } = req.body;
-            const response = await authService.getUser(email, password, socketId);
+            const { password, email, coordinates } = req.body;
+            const response = await authService.getUser(email, password, coordinates);
             res.setHeader("Authorization", `Bearer: ${response.data.tokens.access.token}`)
             res.status(StatusCodes.OK).send({
                 ...response,
