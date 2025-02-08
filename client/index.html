@@ -40,6 +40,9 @@
         <div id="bookingRequestsOutput"></div>
     </div>
 
+    <div id="userOutput">
+    </div>
+
     <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
     <script>
         function redirectToSignIn(){
@@ -48,18 +51,19 @@
 
         let token = '';
         let socket;
-
+        socket = io('http://localhost:5000');
+        console.log(socket)
         async function login() {
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
-
+            const  coordinates =  [17.27634, 78.3795]
             try {
             const response = await fetch('http://localhost:5000/api/v1/auth/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ email, password })
+                body: JSON.stringify({ email, password, coordinates })
             });
 
                 // Check if the response is OK (status code 200-299)
@@ -72,10 +76,27 @@
             alert('Logged in successfully');
 
             // Initialize socket connection
-            socket = io('http://localhost:5000');
-            console.log(socket)
             // Register driver with socket ID
-            socket.emit('registerDriver', data.data.user._id);
+            const user = data.data.user
+            console.log(user)
+            if(user.role === "driver"){
+                socket.emit('registerDriver', data.data.user._id);
+            }
+            if(user.role === "passenger"){
+                socket.emit('registerPassenger', data.data.user._id);
+            }
+
+           if(user){
+            const userComponent = document.getElementById("userOutput")
+            const userDiv = document.createElement("div")
+            userDiv.id = user._id
+            userDiv.innerHTML = `
+            <p>User Name: ${user.name}</p>
+            <p>Role: ${user.role}</P
+            <p>email: ${user.email} </p>
+            `
+            userComponent.appendChild(userDiv)
+           }
 
             // Listen for new bookings
             socket.on('newBooking', (data) => {
