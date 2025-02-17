@@ -1,5 +1,16 @@
-# UberBacckend
+# UberBackend
 UberBackend
+- Built a ride-sharing platform with role-based authentication (passenger/driver) using JWT and secure password hashing with bcrypt.
+- Integrated Redis for fast, temporary storage of user sessions and real-time WebSocket connections.
+- Implemented live ride booking notifications with Socket.IO, alerting nearby drivers (within a 5 km radius) when a ride request is made.
+- Captured real-time geolocation data (latitude & longitude) for passengers and drivers, enabling accurate ride-matching.
+- Developed an automated notification system, sending ride confirmations via email to passengers.
+- Optimised event-driven communication using RabbitMQ (AMQP), enhancing messaging reliability and System scalability.
+- Protected API endpoints with Express Rate Limiter and enforced robust input validation using Zod.
+- Designed and optimised MongoDB schema, efficiently handling users, rides, and geolocation data for real-time queries.
+- Implemented structured logging and error handling with Winston, improving monitoring and debugging.
+- Architected a scalable backend with Express.js, ensuring modularity for future feature expansion.
+- Technologies:  Node.js, Express.js, Redis, MongoDB, Socket.IO, AMQP (RabbitMQ), Zod, JWT, Winston, HTML, CSS, JavaScript
 
 
 ### Deploying to ec2
